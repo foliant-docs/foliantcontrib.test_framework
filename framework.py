@@ -3,6 +3,7 @@ import re
 from logging import getLogger
 from importlib import import_module
 from pathlib import Path, PosixPath
+from unittest.util import _common_shorten_repr
 
 
 class PreprocessorTestFramework:
@@ -176,9 +177,12 @@ class PreprocessorTestFramework:
             )
 
         for e_file, e_content in expected.items():
-            if e_content != self.results[e_file]:
+            f1 = self._normalize(e_content)
+            f2 = self.results[e_file]
+            if self._normalize(e_content) != self.results[e_file]:
                 raise ResultsDifferError(
-                    f'File {e_file} contents differ from expected.'
+                    f'File {e_file} contents differ from expected:\n'
+                    '{}\n!=\n{}'.format(*_common_shorten_repr(f1, f2))
                 )
 
 
