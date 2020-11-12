@@ -1,0 +1,7 @@
+*.pyc
+__pycache__
+__folianttmp__
+build
+dist
+*.egg-info
+.DS_Store
