@@ -147,9 +147,9 @@ class PreprocessorTestFramework:
             self._options
         ).apply()
 
+        self._collect_results(normalize)
         if not keep:
             self._cleanup()
-        self._collect_results(normalize)
 
         expected = {}
         if expected_dir:
