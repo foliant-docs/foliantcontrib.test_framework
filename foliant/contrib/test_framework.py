@@ -1,5 +1,6 @@
 import shutil
 import re
+import os
 from logging import getLogger
 from importlib import import_module
 from pathlib import Path, PosixPath
@@ -85,6 +86,14 @@ class PreprocessorTestFramework:
             with open(file_path, 'w', encoding='utf8') as f:
                 f.write(content)
 
+    def _generate_chapters(self):
+        working_dir = Path(self._context['config']['tmp_dir'])
+        chapters = []
+        for chapter_path in working_dir.rglob('*.md'):
+            rel_path = chapter_path.relative_to(working_dir)
+            chapters.append(rel_path)
+        self.chapters = chapters
+
     def _collect_results(self, normalize: bool = False):
         self._results_dict = {}
         working_dir = Path(self.context['config']['tmp_dir'])
@@ -138,6 +147,7 @@ class PreprocessorTestFramework:
         if input_mapping:
             self.source_dict.update(input_mapping)
         self._generate_working_dir()
+        self._generate_chapters()
 
         self.preprocessor(
             self.context,
