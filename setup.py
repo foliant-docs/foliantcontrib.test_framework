@@ -25,7 +25,6 @@ setup(
     platforms='any',
     install_requires=[
         'foliant>=1.0.8',
-        'PyYAML'
     ],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
