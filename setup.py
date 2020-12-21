@@ -20,11 +20,11 @@ setup(
     author='Daniil Minukhin',
     author_email='ddddsa@gmail.com',
     url='https://github.com/foliant-docs/foliantcontrib.test_framework',
-    packages=['foliant.contrib'],
+    packages=['foliant_test'],
     license='MIT',
     platforms='any',
     install_requires=[
-        'foliant>=1.0.8',
+        # 'foliant>=1.0.8',
     ],
     classifiers=[
         "Development Status :: 5 - Production/Stable",

@@ -1,10 +1,50 @@
 import shutil
 import re
-import os
 from logging import getLogger
 from importlib import import_module
 from pathlib import Path, PosixPath
 from unittest.util import _common_shorten_repr
+
+
+def unpack_dir(input_dir: str or PosixPath, extensions: list = ['md']) -> dict:
+    '''
+    Search for file with extensions from `extensions` in the `input_dir` and
+    pack them into the framework's input mapping format:
+    {'file_name.md': '<file contents>'}
+
+    :param input_dir: directory with source files to be packed into mapping.
+    :param extensions: list of file extensions to be parsed inside input_dir.
+
+    :returns: mapping ready to be fed into PreprocessorTestFramework.
+    '''
+    result = {}
+    input_path = Path(input_dir)
+    for extension in extensions:
+        for file_path in input_path.rglob(f'*.{extension}'):
+            file_key = str(file_path.relative_to(input_path))
+            with open(file_path, encoding='utf8') as f:
+                result[file_key] = f.read()
+    return result
+
+
+def unpack_file_dict(file_dict: dict) -> dict:
+    '''
+    Open each file in the file dict and replace it with its contents.
+
+    :param file_dict: dictionary of following format:
+                      {'source_name.md': 'data/file_name.md'}
+                      where `source_name` is file name which will be given to
+                      the PreprocessorTestFramework, `data/file_name.md` is local
+                      file which should be unpacked.
+
+    :returns: mapping ready to be fed into PreprocessorTestFramework:
+              {'source_name.md': '<file contents>'}
+    '''
+    result = {}
+    for file_key, file_path in file_dict.items():
+        with open(file_path, encoding='utf8') as f:
+            result[file_key] = f.read()
+    return result
 
 
 class PreprocessorTestFramework:
@@ -25,13 +65,13 @@ class PreprocessorTestFramework:
         self._chapters = []
         self._files = {}
         self._context = {
-            'project_path': '',
+            'project_path': Path('.'),
             'config': {'preprocessors': [preprocessor_name], **self.config_defaults},
             'target': '',
             'backend': ''
         }
         self.logger = getLogger('PreprocessorTestFramework')
-        self.quiet = False
+        self.quiet = True
         self.debug = False
 
     @property
@@ -97,14 +137,13 @@ class PreprocessorTestFramework:
     def _collect_results(self, normalize: bool = False):
         self._results_dict = {}
         working_dir = Path(self.context['config']['tmp_dir'])
-        for markdown_file_path in working_dir.rglob('*.md'):
+        for markdown_file_path in working_dir.rglob('*.*'):
             file_key = str(markdown_file_path.relative_to(Path(working_dir)))
             with open(markdown_file_path, encoding='utf8') as f:
                 content = f.read()
                 if normalize:
                     content = self._normalize(content)
                 self._results_dict[file_key] = content
-                print(file_key)
         self._results_normalized = normalize
 
     def _normalize(self, markdown_content: str) -> str:
@@ -113,7 +152,10 @@ class PreprocessorTestFramework:
         remove excessive whitespace characters,
         provide trailing newline, etc.
         :param markdown_content: Source Markdown content
-        :returns: Normalized Markdown content
+        :returns: Normalized Markdown content.
+
+        Note: to avoid unnecessary empty line tuning we reduce 3 or more line
+        breaks into 2.
         '''
 
         markdown_content = re.sub(r'^\ufeff', '', markdown_content)
@@ -124,6 +166,7 @@ class PreprocessorTestFramework:
         markdown_content = re.sub(r'\t', '    ', markdown_content)
         markdown_content = re.sub(r'[ \n]+$', '\n', markdown_content)
         markdown_content = re.sub(r' +\n', '\n', markdown_content)
+        markdown_content = re.sub(r'\n{3,}', '\n\n', markdown_content)
 
         return markdown_content
 
@@ -132,18 +175,12 @@ class PreprocessorTestFramework:
         shutil.rmtree(self.context['config']['src_dir'], ignore_errors=True)
 
     def test_preprocessor(self,
-                          input_dir: str or PosixPath or None = None,
                           input_mapping: dict or None = None,
-                          expected_dir: str or PosixPath or None = None,
                           expected_mapping: dict or None = None,
                           keep: bool = False,
                           normalize: bool = True):
+        self._cleanup()
         self.source_dict = {}
-        if input_dir:
-            for markdown_file_path in Path(input_dir).rglob('*.md'):
-                file_key = str(markdown_file_path.relative_to(Path(input_dir)))
-                with open(markdown_file_path, encoding='utf8') as f:
-                    self.source_dict[file_key] = f.read()
         if input_mapping:
             self.source_dict.update(input_mapping)
         self._generate_working_dir()
@@ -162,17 +199,12 @@ class PreprocessorTestFramework:
             self._cleanup()
 
         expected = {}
-        if expected_dir:
-            for markdown_file_path in Path(expected_dir).rglob('*.md'):
-                file_key = str(markdown_file_path.relative_to(Path(expected_dir)))
-                with open(markdown_file_path, encoding='utf8') as f:
-                    expected[file_key] = f.read()
         if expected_mapping:
             expected.update(expected_mapping)
 
         if expected:
             self.compare_results(expected)
-            print('ok!')
+            # print('ok!')
 
     def compare_results(self, expected: dict):
         if self._results_normalized:
