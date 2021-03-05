@@ -80,3 +80,48 @@ Apart from options you can also change:
 `config` attribute which represents the virtual `foliant.yml` dictionary;
 `chapters` attribute, which holds the list of chapters,
 `context` attribute which holds the whole preprocessor context.
+
+#### Helper Functions For Input And Expected Mappings
+
+It's ok to keep contents of test files in strings right inside your test modules, but when these strings grow big it's more convenient to keep them in separate files. `preprocessor` module exports two functions which help you managing those:
+
+**unpack_file_dict**
+
+`unpack_file_dict` turns dictionary of filenames into dictionary of these files' contents.
+
+```python
+from foliant_test.preprocessor import unpack_file_dict
+
+file_dict = {
+    'index.md', '/test_data/case1/index.md',  # paths should better be absolute
+    'description.md', '/test_data/case1/description.md',
+}
+```
+
+When you feed this dictionary to unpack_file_dict, it will replace paths to data files `'/test_data/case1/index.md'` and `'/test_data/case1/description.md'` with their contents, so you can pass the result straight to `input_mapping` or `expected_mapping` parameters:
+
+```python
+unpack_file_dict(file_dict)
+
+{
+    'index.md': 'index md contents',
+    'description.md': 'description md contents'
+}
+
+
+ptf.test_preprocessor(
+    input_mapping=unpack_file_dict(file_dict),
+    expected_mapping=unpack_file_dict(expected_file_dict)
+)
+```
+
+**unpack_dir**
+
+`unpack_dir` creates the whole mapping for you, based on the contents of supplied dir. It reads all files inside specified dir and puts them into a dictinoary: `{<file_name>: <file_contents>}`. Note: `<file_name>` does not include path, so `test_data/case1/index.md` will turn into `index.md`.
+
+```python
+from foliant_test.preprocessor import unpack_dir
+
+input_dict = unpack_dir('/test_data/case1')  # paths should better be absolute
+output_dict = unpack_dir('/test_data/case1_expected')
+```
