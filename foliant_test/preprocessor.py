@@ -224,7 +224,7 @@ class PreprocessorTestFramework:
             if self._normalize(e_content) != self.results[e_file]:
                 raise ResultsDifferError(
                     f'File {e_file} contents differ from expected:\n'
-                    '{}\n!=\n{}'.format(*_common_shorten_repr(f1, f2))
+                    '{}\n!=\n{}'.format(*_common_shorten_repr(f2, f1))
                 )
 
 
