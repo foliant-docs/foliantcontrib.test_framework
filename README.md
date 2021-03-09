@@ -2,7 +2,7 @@
 
 # Test framework
 
-Foliant test framework is a tool which helps you test your Foliant extensions. It is still under development and right now you can only test preprocessors with it using Preprocessor Test Framework.
+Foliant test framework is a tool which helps you test your Foliant extensions. It is still under development and right now you can only test preprocessors and config extensions with it using Preprocessor Test Framework and Config Extensions Test Framework.
 
 ## Preprocessor Test Framework
 
