@@ -2,7 +2,7 @@
 
 # Test framework
 
-Foliant test framework is a tool which helps you test your Foliant extensions. It is still under development and right now you can only test preprocessors and config extensions with it using Preprocessor Test Framework and Config Extensions Test Framework.
+Foliant test framework is a tool which helps you test your Foliant extensions. It is still under development and right now you can only test preprocessors and config extensions with it using Preprocessor Test Framework and Configuration Extensions Test Framework.
 
 ## Preprocessor Test Framework
 
@@ -132,7 +132,7 @@ Configuration Extension Test Framework is a class which allows you to quickly se
 
 ### Usage
 
-First you need to initialize the framework by passing it a name of preprocessor you want to test. Let's test the `path` builtin config extension in this example:
+First you need to initialize the framework by passing it a name of extensions you want to test. Let's test the `path` builtin config extension in this example:
 
 ```python
 >>> from foliant_test.config_extension import ConfigExtensionTestFramework
