@@ -125,3 +125,37 @@ from foliant_test.preprocessor import unpack_dir
 input_dict = unpack_dir('/test_data/case1')  # paths should better be absolute
 output_dict = unpack_dir('/test_data/case1_expected')
 ```
+
+## Configuration Extension Test Framework
+
+Configuration Extension Test Framework is a class which allows you to quickly set up simulated environment for testing config extensions. It parses the config just like Foliant core does it, and the compares the results with expected results.
+
+### Usage
+
+First you need to initialize the framework by passing it a name of preprocessor you want to test. Let's test the `path` builtin config extension in this example:
+
+```python
+>>> from foliant_test.config_extension import ConfigExtensionTestFramework
+>>> ctf = ConfigExtensionTestFramework('path')
+
+```
+
+Now to test the work of `path` we need to supply a source config. The config is supplied in a YAML-string, as if it was a plain-text `foliant.yml` file.
+
+The config string is supplied in `input_config` parameter, and is then compared to the expected config in `expected_config` parameter. Note that the latter is of type dict, because it's already parsed config.
+
+```python
+ctf.test_extension(
+    input_config='mypath: !path README.md',
+    expected_config={'mypath': '/usr/src/app/myproject/README.md'}
+)
+
+```
+
+You can adjust following parameters before testing the extension:
+
+```python
+ctf.project_path = Path('.')
+ctf.config_file_name = '_foliant.yml'
+ctf.quiet = True
+```
