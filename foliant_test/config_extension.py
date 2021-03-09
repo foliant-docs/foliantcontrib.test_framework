@@ -34,18 +34,21 @@ class ConfigExtensionTestFramework:
                        input_config: str,
                        expected_config: dict,
                        keep: bool = False):
-
         self._cleanup()
-        self._generate_config(input_config)
-        parser = self.parser(project_path=self.project_path,
-                             config_file_name=self.config_file_name,
-                             logger=self.logger,
-                             quiet=self.quiet)
+        try:
+            self._generate_config(input_config)
+            parser = self.parser(project_path=self.project_path,
+                                 config_file_name=self.config_file_name,
+                                 logger=self.logger,
+                                 quiet=self.quiet)
 
-        result = parser.parse()
+            result = parser.parse()
 
-        if result:
-            self.compare_results(result, expected_config)
+            if result:
+                self.compare_results(result, expected_config)
+        finally:
+            if not keep:
+                self._cleanup()
 
     def _cleanup(self):
         if os.path.isfile(self.config_path):
