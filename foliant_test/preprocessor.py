@@ -170,16 +170,18 @@ class PreprocessorTestFramework:
 
         return markdown_content
 
-    def _cleanup(self):
+    def _cleanup(self, keep_sources: bool = False):
         shutil.rmtree(self.context['config']['tmp_dir'], ignore_errors=True)
-        shutil.rmtree(self.context['config']['src_dir'], ignore_errors=True)
+        if not keep_sources:
+            shutil.rmtree(self.context['config']['src_dir'], ignore_errors=True)
 
     def test_preprocessor(self,
                           input_mapping: dict or None = None,
                           expected_mapping: dict or None = None,
                           keep: bool = False,
+                          keep_sources: bool = False,
                           normalize: bool = True):
-        self._cleanup()
+        self._cleanup(keep_sources)
         self.source_dict = {}
         if input_mapping:
             self.source_dict.update(input_mapping)
@@ -196,7 +198,7 @@ class PreprocessorTestFramework:
 
         self._collect_results(normalize)
         if not keep:
-            self._cleanup()
+            self._cleanup(keep_sources)
 
         expected = {}
         if expected_mapping:
